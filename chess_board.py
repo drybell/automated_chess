@@ -32,6 +32,7 @@ GAME_BOARD = [['0','0','0','0','0','0','0','0'],
 			  ['0','0','0','0','0','0','0','0'],
 			  ['0','0','0','0','0','0','0','0']]
 
+
 # CONSTANTS 
 WHITE = 1
 BLACK = 2
@@ -60,49 +61,49 @@ def read_in_board():
 			if 'P' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = Pawn(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = Pawn(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = Pawn(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = Pawn(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			elif 'R' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = Rook(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = Rook(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = Rook(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = Rook(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			elif 'N' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = Knight(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = Knight(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = Knight(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = Knight(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			elif 'B' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = Bishop(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = Bishop(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = Bishop(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = Bishop(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			elif 'Q' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = Queen(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = Queen(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = Queen(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = Queen(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			elif 'K' in row_item:
 				populate = True
 				if '2' in row_item:
-					chess_piece = King(BLACK, READ_IN_BOARD[y][x])
+					chess_piece = King(BLACK, READ_IN_BOARD[y][x], (y,x))
 				else:
-					chess_piece = King(WHITE, READ_IN_BOARD[y][x])
+					chess_piece = King(WHITE, READ_IN_BOARD[y][x], (y,x))
 
 			if populate:
 				GAME_BOARD[y][x] = chess_piece
 			else:
-				GAME_BOARD[y][x] = ' '
+				GAME_BOARD[y][x] = '  '
 			x += 1
 		y += 1
 	return GAME_BOARD
@@ -111,26 +112,39 @@ def read_in_board():
 
 class ChessPiece:
 
-	def __init__(self, color, position):
+	def __init__(self, color, position, true_position):
 		self.color = color
 		self.alive = True
 		self.position = position
+		self.true_position = true_position
+
+	def get_color(self):
+		return self.color
 
 	def get_position(self):
 		return self.position
 
-	def is_captured(enemyPiece):
+	def set_position(self, position):
+		self.position = position
+
+	def get_true_position(self):
+		return self.true_position
+
+	def set_true_position(self, position):
+		self.true_position = position
+
+	def is_captured(self, enemyPiece):
 		self.alive = False
 		self.position = OFFBOARD
 
-	def capture(enemyPiece):
+	def capture(self, enemyPiece):
 		self.position = enemyPiece.get_position()
 		enemyPiece.is_captured()
 
 
 class Pawn(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.moveSet = PAWN
 		self.score = 1
 
@@ -139,8 +153,8 @@ class Pawn(ChessPiece):
 
 
 class Knight(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.moveSet = KNIGHT
 		self.score = 3
 
@@ -148,8 +162,8 @@ class Knight(ChessPiece):
 		return "N" + str(self.color)
 
 class Bishop(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.moveSet = BISHOP
 		self.score = 3
 
@@ -157,8 +171,8 @@ class Bishop(ChessPiece):
 		return "B" + str(self.color)
 
 class Rook(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.moveSet = ROOK
 		self.score = 5
 
@@ -166,8 +180,8 @@ class Rook(ChessPiece):
 		return "R" + str(self.color)
 
 class Queen(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.moveSet = QUEEN
 		self.score = 8
 
@@ -175,8 +189,8 @@ class Queen(ChessPiece):
 		return "Q" + str(self.color)
 
 class King(ChessPiece):
-	def __init__(self, color, position):
-		super().__init__(color, position)
+	def __init__(self, color, position, true_position):
+		super().__init__(color, position, true_position)
 		self.inCheck = False
 		self.moveSet = KING
 		self.score = 500

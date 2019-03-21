@@ -4,12 +4,22 @@
 # chess_game.py
 # Handles movements, utilizes chess_board library for environment
 
-import chess_board
+from chess_board import *
+import copy
+
+EMPTY_BOARD =[[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+			  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']]
 
 
-check_array1 = ['P', 'N', 'B' , 'R', 'Q', 'K', 'p', 'n', 'b' , 'r', 'q', 'k']
-check_array2 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-check_array3 = [1,2,3,4,5,6,7,8]
+check_array1 = ['P', 'N', 'B','R', 'Q', 'K']
+check_array2 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+check_array3 = ['1','2','3','4','5','6','7','8']
 
 off_board_white = []
 off_board_black = []
@@ -22,154 +32,395 @@ class Player():
 		self.alive = True
 		self.currentTurn = False
 
-	def getColor():
+	def getColor(self):
 		return self.color
 
-	def setTurn(isTrue):
+	def setTurn(self, isTrue):
 		if isTrue == False:
 			self.currentTurn = False
 		else:
 			self.currentTurn = True
 
-	def getTurn():
+	def getTurn(self):
 		return self.currentTurn
 
 	def __str__(self):
 		return self.color + " " + self.score
 
-def getCorrectInput():
-	check_input = input("Enter a move: ")
-	input_list = []
+def diagonals(true_position):
+	left_diagonal = []
+	right_diagonal = []
 
-	if check_input.len() != 3:
+	x_pos = true_position[0]
+	y_pos = true_position[1]
+
+	x_pos2 = true_position[0]
+	y_pos2 = true_position[1]
+
+	x_pos3 = true_position[0]
+	y_pos3 = true_position[1]
+
+	x_pos4 = true_position[0]
+	y_pos4 = true_position[1]
+
+	for x in range(0,8):
+		x_pos -= 1
+		y_pos += 1
+		if x_pos < 0 or x_pos > 7:
+			break
+		if y_pos < 0 or y_pos > 7: 
+			break
+		left_diagonal.append((x_pos,y_pos))
+
+	# print(f"{x_pos} {y_pos} {x_pos2} {y_pos2} {x_pos3} {y_pos3} {x_pos4} {y_pos4}")
+
+	for x in range(0,8):
+		x_pos2 += 1
+		y_pos2 -= 1
+		if x_pos2 < 0 or x_pos2 > 7:
+			break
+		if y_pos2 < 0 or y_pos2 > 7: 
+			break
+		left_diagonal.append((x_pos2,y_pos2))
+
+	# print(f"{x_pos} {y_pos} {x_pos2} {y_pos2} {x_pos3} {y_pos3} {x_pos4} {y_pos4}")
+
+	for x in range(0,8):
+		x_pos3 += 1
+		y_pos3 += 1
+		if x_pos3 < 0 or x_pos3 > 7:
+			break
+		if y_pos3 < 0 or y_pos3 > 7: 
+			break
+		right_diagonal.append((x_pos3,y_pos3))
+
+	# print(f"{x_pos} {y_pos} {x_pos2} {y_pos2} {x_pos3} {y_pos3} {x_pos4} {y_pos4}")
+
+	for x in range(0,8):
+		x_pos4 -= 1
+		y_pos4 -= 1
+		if x_pos4 < 0 or x_pos4 > 7:
+			break
+		if y_pos4 < 0 or y_pos4 > 7: 
+			break
+		right_diagonal.append((x_pos4,y_pos4))
+	# print(f"{x_pos} {y_pos} {x_pos2} {y_pos2} {x_pos3} {y_pos3} {x_pos4} {y_pos4}")
+
+	totals = (left_diagonal, right_diagonal)
+	return totals
+
+
+
+
+def getAPiece(GAME_BOARD, myPlayer):
+	color = myPlayer.getColor()
+	print(f"{color} Player", end = " ")
+	check_input = input("Enter a position for a piece (ex. Ph2): ")
+	input_list = []
+	turn = myPlayer.getTurn()
+	check = False
+
+	if len(check_input) != 3:
 		print("Try Again.")
-		getCorrectInput()
+		return False
 	else:
 		input_list = list(check_input)
 		if input_list[0] not in check_array1:
+			print(input_list[0])
 			print("Try Again.")
-			getCorrectInput()
+			return False
 		if input_list[1] not in check_array2:
+			print(input_list[1])
 			print("Try Again")
-			getCorrectInput()
+			return False
 		if input_list[2] not in check_array3:
+			print(input_list[2])
 			print("Try Again")
-			getCorrectInput()
+			return False
+
+	position = input_list[1] + input_list[2]
+	name = input_list[0]
+
+	for column in GAME_BOARD:
+		for row_item in column:
+			if name in str(row_item):
+				# print(name)
+				# print(row_item)
+				# print(position)
+				# print(row_item.get_position())
+				if position == row_item.get_position():
+					if row_item.get_color() == 1 and color == "BLACK":
+						print("Wrong Side")
+						check = False
+						break
+					elif row_item.get_color() == 2 and color == "WHITE":
+						print("Wrong Side")
+						check = False
+						break
+					else:
+						input_list.append(row_item)
+						check = True
+						break
+
+	if check == False:
+		return False 
+	else:
+		return input_list
+
+
+def pickAPiece(valid_input, player1, GAME_BOARD):
+	current_piece = valid_input[0]
+	position = valid_input[1] + valid_input[2]
+	actual_piece = valid_input[3]
+	all_pieces = {
+		'P': pawnRules,
+		# 'N': knightRules,
+		# 'B': bishopRules,
+		# 'R': rookRules,
+		# 'Q': queenRules,
+		# 'K': kingRules
+	}
+	function = all_pieces.get(current_piece)
+	test = function(valid_input, player1, GAME_BOARD)
+	if test == False:
+		return False
+	else:
+		return True
+
+
+def updateBoard(updated_position, curr_piece, player, GAME_BOARD):
+	target_piece = 0
+	new_true_position = []
+	color = player.getColor()
+	# print(updated_position)
+	for x in range(0,8):
+		for y in range(0,8):
+			if updated_position == READ_IN_BOARD[x][y]:
+				# print(f"{x} {y}")
+				# print(updated_position)
+				new_true_position = (x,y)
+			temp = GAME_BOARD[x][y]
+			if isinstance(temp, str):
+				pass
+			else:
+				position = temp.get_position()
+				if position is updated_position:
+					target_piece = GAME_BOARD[x][y]
+
+	old_position = curr_piece.get_true_position()
+	# print(old_position)
+	GAME_BOARD[old_position[0]][old_position[1]] = ' '
+
+	if target_piece == 0:
+		# this means that there is no piece in that position
+		# so we don't have to worry about capturing 
+		curr_piece.set_position(updated_position)
+		curr_piece.set_true_position(new_true_position)
+	else:
+		curr_piece.capture(target_piece)
+		curr_piece.set_true_position(updated_position)
+		if color == "WHITE":
+			off_board_white.append(target_piece)
+		else:
+			off_board_black.append(target_piece)
+	# print(new_true_position)
+	GAME_BOARD[new_true_position[0]][new_true_position[1]] = curr_piece
+	printGameBoard(GAME_BOARD)
+
+
+
+# def lookForCheck():
+
+
+
+def getNewPosition():
+	check_input = input("Enter a NEW POSITION for your piece: ")
+	input_list = []
+
+	if len(check_input) != 3:
+		print("Try Again.")
+		return False
+	else:
+		input_list = list(check_input)
+		if input_list[0] not in check_array1:
+			print(input_list[0])
+			print("Try Again.")
+			return False
+		if input_list[1] not in check_array2:
+			print(input_list[1])
+			print("Try Again")
+			return False
+		if input_list[2] not in check_array3:
+			print(input_list[2])
+			print("Try Again")
+			return False
 
 	return input_list
 
 
-def pickAPiece(current_piece, position, player):
-	all_pieces = {
-		'P': pawnRules,
-		'N': knightRules,
-		'B': bishopRules,
-		'R': rookRules,
-		'Q': queenRules,
-		'K': kingRules
-	}
-	function = all_pieces.get(current_piece)
-	complete = function(position, player)
-	if complete[0]:
-		# updateBoard()  
-	else{
-		getCorrectInput()
-	}
+def checkNearestEnemy(piece, side, GAME_BOARD):
+	enemies = copy.deepcopy(EMPTY_BOARD)
+	position = piece.get_position()
+	tp = piece.get_true_position()
+
+	Y_BOARD = getYRepresentation(GAME_BOARD)
+
+	x_list = GAME_BOARD[tp[0]]
+	y_list = Y_BOARD[tp[1]]
+
+	enemies[tp[0]] = x_list
+	for x in range(0,8):
+		enemies[x][tp[1]] = y_list[x]
+
+	diagonal = diagonals(tp)
+	left = diagonal[0]
+	right = diagonal[1]
+	for l in left:
+		enemies[l[0]][l[1]] = GAME_BOARD[l[0]][l[1]]
+	for r in right:
+		enemies[r[0]][r[1]] = GAME_BOARD[r[0]][r[1]]
+
+	# if side == "WHITE":
+	# 	for x in range(0,8):
+	# 		for y in range(0,8):
+	# 			if "1" in str(enemies[x][y]):
+	# 				enemies[x][y] = "  "
+
+	# else:
+	# 	for x in range(0,8):
+	# 		for y in range(0,8):
+	# 			if "2" in str(enemies[x][y]):
+	# 				enemies[x][y] = "  "
+
+	printGameBoard(enemies)
+
+	return enemies
 
 
-def getPieces(curr_piece):
-	x = 0
-	y = 0
-	piece_list = []
-	for column in GAME_BOARD:
-		x = 0
-		for row_item in GAME_BOARD:
-			if curr_piece is str(row_item):
-				piece_list.append(row_item)
-			x += 1
-		y += 1
-	return piece_list
 
-
-def pawnRules(position, player):
+def pawnRules(valid_input, player, GAME_BOARD):
 	side = player.getColor()
-	valid_pawns = []
-	pawn_positions = []
+	piece = valid_input[3]
+	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
+	position = piece.get_position()
+	rip_position = list(position)
+	letter = rip_position[0]
+	number = int(rip_position[1])
+	true_position = piece.get_true_position()
+	print(true_position)
 
-	if side is "WHITE":
-		valid_pawns = getPieces('P1')
-	else:
-		valid_pawns = getPieces('P2')
+	valid_moves = []
 
-	for pawn in valid_pawns:
-		pawn_positions.append(pawn.get_position())
+	if side == "WHITE":
+		left_diagonal = (true_position[0] - 1, true_position[1] - 1)
+		right_diagonal = (true_position[0] - 1, true_position[1] + 1)
+		print(f"{left_diagonal} {right_diagonal}")
+		if left_diagonal[0] < 0 or left_diagonal[1] < 0:
+			left_diagonal = "x"
+		if right_diagonal[0] < 0 or right_diagonal[1] > 7:
+			right_diagonal = "x"
 
-	sub_pos = list(position)
-	y_position = int(sub_pos[1])
-	x_position = sub_pos[0]
-
-	for curr_pos in pawn_positions:
-		if side is "WHITE":
-			if curr_pos in READ_IN_BOARD[6]:
-				if y_position < 2 and y_position > 4:
-					print("Invalid move")
-					return [False, None]
+		vertical = (true_position[0] - 1, true_position[1])
+		if vertical[0] < 0:
+			vertical = "x"
+		if not isinstance(vertical, str):
+			if isinstance(GAME_BOARD[vertical[0]][vertical[1]], str):
+				if number == 2:
+					valid_moves.append((letter + str(number + 1)))
+					valid_moves.append((letter + str(number + 2)))
 				else:
-					if y_position
+					valid_moves.append((letter + str(number + 1)))
 
+		if not isinstance(left_diagonal, str):
+			if "2" in str(enemy[left_diagonal[0]][left_diagonal[1]]):
+				valid_moves.append(READ_IN_BOARD[left_diagonal[0]][left_diagonal[1]])
+		if not isinstance(right_diagonal, str):
+			if "2" in str(enemy[right_diagonal[0]][right_diagonal[1]]):
+				valid_moves.append(READ_IN_BOARD[right_diagonal[0]][right_diagonal[1]])
+	else:
+		left_diagonal = (true_position[0] + 1, true_position[1] - 1)
+		right_diagonal = (true_position[0] + 1, true_position[1] + 1)
+		print(f"{left_diagonal} {right_diagonal}")
+		if left_diagonal[0] > 7 or left_diagonal[1] < 0:
+			left_diagonal = "x"
+		if right_diagonal[0] > 7 or right_diagonal[1] > 7:
+			right_diagonal = "x"
+
+		vertical = (true_position[0] + 1, true_position[1])
+		if vertical[0] > 7:
+			vertical = "x"
+		if not isinstance(vertical, str):
+			if isinstance(GAME_BOARD[vertical[0]][vertical[1]], str):
+				if number == 7:
+					valid_moves.append((letter + str(number - 1)))
+					valid_moves.append((letter + str(number - 2)))
+				else:
+					valid_moves.append((letter + str(number - 1)))
+
+		if not isinstance(left_diagonal, str):
+			if "1" in str(enemy[left_diagonal[0]][left_diagonal[1]]):
+				valid_moves.append(READ_IN_BOARD[left_diagonal[0]][left_diagonal[1]])
+		if not isinstance(right_diagonal, str):
+			if "1" in str(enemy[right_diagonal[0]][right_diagonal[1]]):
+				valid_moves.append(READ_IN_BOARD[right_diagonal[0]][right_diagonal[1]])
+
+	if not valid_moves:
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		print(f"Valid moves are {valid_moves}\n")
+		finalize(valid_moves, GAME_BOARD, piece, player)
+		return True
+
+
+
+def finalize(valid_moves, GAME_BOARD, piece, player):
+	new_position = "x"
+	check = False
+	while check == False:
+		new_input = False
+		while isinstance(new_input, bool):
+			new_input = getNewPosition()
+		new_position = new_input[1] + new_input[2]
+		if new_position not in valid_moves:
+			check = False
 		else:
-			if curr_pos in READ_IN_BOARD[1]:
-				if y_position == 5:
+			check = True
+
+	updateBoard(new_position, piece, player, GAME_BOARD)
 
 
 
+# def knightRules(position, player):
+
+# def bishopRules(position, player):
+
+# def rookRules(position, player):
+
+# def queenRules(position, player):
+
+# def kingRules(position, player):
 
 
-def knightRules(position, player):
-
-def bishopRules(position, player):
-
-def rookRules(position, player):
-
-def queenRules(position, player):
-
-def kingRules(position, player):
-
-
-def makeMove(myPlayer):
+def makeMove(myPlayer, GAME_BOARD):
 
 	valid_move = False
 
-	while(!valid_move){
-		valid_input = getCorrectInput()
-		position = valid_input[1] + valid_input[2]
-		pickAPiece(valid_input[0], position, myPlayer)
+	while(not valid_move):
+		valid_input = getAPiece(GAME_BOARD, myPlayer)
+		while isinstance(valid_input, bool):
+			valid_input = getAPiece(GAME_BOARD, myPlayer)
+		valid_move = pickAPiece(valid_input, myPlayer, GAME_BOARD)
 
 
 
-		
+# def is_off_board():
 
 
+# def in_check():
 
 
-	}
-
-
-
-def is_off_board():
-
-
-def piece_collision():
-
-
-def in_check():
-
-
-def inMate():
-
-
-
-def gameStep():
+# def inMate():
 
 
 def checkTurn(my_player1, my_player2):
@@ -179,7 +430,49 @@ def checkTurn(my_player1, my_player2):
 		return my_player2
 
 
+def printGameBoard(board):
+		for column in board:
+			for row in column:
+				if isinstance(row, str):
+					print(row, end="  ")
+				else:
+					print(row, end=" ")
+			print()
 
+
+def getYRepresentation(GAME_BOARD):
+
+	Y_BOARD = copy.deepcopy(EMPTY_BOARD)
+
+	for x in range(0,8):
+		for y in range(0,8):
+		 	Y_BOARD[x][y] = GAME_BOARD[y][x]
+
+	return Y_BOARD
+
+def flipBoard(GAME_BOARD):
+
+	P2_SIDE = copy.deepcopy(EMPTY_BOARD)
+
+	for x in range(0,8):
+		for y in range(0,8):
+			P2_SIDE[7-x][7-y] = copy.deepcopy(GAME_BOARD[x][y])
+
+	return P2_SIDE
+
+def gameStep(current_player, second_player, GAME_BOARD):
+	game_over = False
+	while game_over == False:
+		makeMove(current_player, GAME_BOARD)
+		current_player.setTurn(False)
+		second_player.setTurn(True)
+		temp = current_player
+		current_player = second_player
+		second_player = temp
+		# flip_board = flipBoard(GAME_BOARD)
+		print('_______________________\n')
+		# printGameBoard(flip_board)
+		printGameBoard(GAME_BOARD)
 
 def main():
 
@@ -187,23 +480,14 @@ def main():
 	white_player = Player("WHITE")
 	black_player = Player("BLACK")
 	current_player = white_player
+	second_player = black_player
 	white_player.setTurn(True)
-
 
 	# Initialize game board
 	GAME_BOARD = read_in_board()
+	printGameBoard(GAME_BOARD)
 
-	makeMove(current_player)
-
-
-
-
-
-
-
-
-
-
+	gameStep(current_player, second_player, GAME_BOARD)
 
 
 if __name__ == '__main__':
