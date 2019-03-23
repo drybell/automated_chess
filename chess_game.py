@@ -47,6 +47,46 @@ class Player():
 	def __str__(self):
 		return self.color + " " + self.score
 
+def getLs(true_position):
+
+	x = true_position[0]
+	y = true_position[1]
+
+	#clockwise rotation at right side
+
+	x1 = x - 2
+	y1 = y + 1
+
+	x2 = x - 1
+	y2 = y + 2
+
+	x3 = x + 1
+	y3 = y + 2
+
+	x4 = x + 2
+	y4 = y + 1
+
+	x5 = x + 2
+	y5 = y - 1
+
+	x6 = x + 1
+	y6 = y - 2
+
+	x7 = x - 1
+	y7 = y - 2
+
+	x8 = x - 2
+	y8 = y - 1
+
+	L = [(x1,y1), (x2,y2), (x3,y3), (x4,y4), (x5,y5), (x6,y6), (x7,y7), (x8,y8)]
+	for x in range(0,8):
+		item = L[x]
+		if (item[0] < 0 or item[0] > 7):
+			L[x] = 'x'
+		elif (item[1] < 0 or item[1] > 7):
+			L[x] = 'x'
+	return L
+
 def diagonals(true_position):
 	left_diagonal = []
 	right_diagonal = []
@@ -110,7 +150,115 @@ def diagonals(true_position):
 	return totals
 
 
+def regulars(true_position):
+	horizontal = []
+	vertical = []
 
+	x_pos = true_position[0]
+	y_pos = true_position[1]
+
+	#left first, then right
+	#up first, then down
+
+	if x_pos == 0 or y_pos == 0:
+		if x_pos == 0 and y_pos == 0:
+			for x in range(1, 8):
+				vertical.append((x,y_pos))
+			for y in range(1, 8):
+				horizontal.append((x_pos,y))
+		elif x_pos == 0:
+			for y in range(y_pos - 1, -1, -1):
+				horizontal.append((x_pos,y))
+			for y in range(y_pos + 1, 8):
+				horizontal.append((x_pos,y))
+			for x in range(1, 8):
+				vertical.append((x,y_pos))
+		elif y_pos == 0:
+			for x in range(x_pos - 1, -1, -1):
+				vertical.append((x,y_pos))
+			for x in range(x_pos + 1, 8):
+				vertical.append((x,y_pos))
+			for y in range(1, 8):
+				horizontal.append((x_pos,y))
+
+	elif x_pos == 7 or y_pos == 7:
+		if x_pos == 7 and y_pos == 7:
+			for x in range(7, -1, -1):
+				vertical.append((x,y_pos))
+			for y in range(7, -1, -1):
+				horizontal.append((x_pos,y))
+		elif x_pos == 7:
+			for y in range(y_pos - 1, -1, -1):
+				horizontal.append((x_pos,y))
+			for y in range(y_pos + 1, 8):
+				horizontal.append((x_pos,y))
+			for x in range(7, -1, -1):
+				vertical.append((x,y_pos))
+		elif y_pos == 7:
+			for x in range(x_pos - 1, -1, -1):
+				vertical.append((x,y_pos))
+			for x in range(x_pos + 1, 8):
+				vertical.append((x,y_pos))
+			for y in range(7, -1, -1):
+				horizontal.append((x_pos,y))
+
+	else:
+		for y in range(y_pos - 1, -1, -1):
+			horizontal.append((x_pos,y))
+		for y in range(y_pos + 1, 8):
+			horizontal.append((x_pos,y))
+
+		for x in range(x_pos - 1, -1, -1):
+			vertical.append((x,y_pos))
+		for x in range(x_pos + 1, 8):
+			vertical.append((x,y_pos))
+
+	return (horizontal, vertical)
+
+def getQuadrants(diagonal, true_position):
+	right = diagonal[0]
+	left = diagonal[1]
+
+	right_up = []
+	right_down = []
+	left_up = []
+	left_down = []
+	for item in right:
+		if item[0] < true_position[0]:
+			right_up.append(item)
+		else:
+			right_down.append(item)
+
+	for item in left:
+		if item[0] < true_position[0]:
+			left_up.append(item)
+		else:
+			left_down.append(item)
+
+	return (right_up, right_down, left_up, left_down)
+
+def splitRegulars(regular, true_position):
+	horizontal = regular[0]
+	vertical = regular[1]
+
+	left = []
+	right = []
+	down = []
+	up = []
+
+	for item in horizontal:
+		if item[1] < true_position[1]:
+			left.append(item)
+		else:
+			right.append(item)
+
+	for item in vertical:
+		if item[0] < true_position[0]:
+			up.append(item)
+		else:
+			down.append(item)
+
+	return (left, right, up, down)
 
 def getAPiece(GAME_BOARD, myPlayer):
 	color = myPlayer.getColor()
@@ -168,27 +316,27 @@ def getAPiece(GAME_BOARD, myPlayer):
 		return input_list
 
 
-def pickAPiece(valid_input, player1, GAME_BOARD):
+def pickAPiece(valid_input, player1, player2, GAME_BOARD):
 	current_piece = valid_input[0]
 	position = valid_input[1] + valid_input[2]
 	actual_piece = valid_input[3]
 	all_pieces = {
 		'P': pawnRules,
-		# 'N': knightRules,
-		# 'B': bishopRules,
-		# 'R': rookRules,
-		# 'Q': queenRules,
-		# 'K': kingRules
+		'N': knightRules,
+		'B': bishopRules,
+		'R': rookRules,
+		'Q': queenRules,
+		'K': kingRules
 	}
 	function = all_pieces.get(current_piece)
-	test = function(valid_input, player1, GAME_BOARD)
+	test = function(valid_input, player1, player2, GAME_BOARD)
 	if test == False:
 		return False
 	else:
 		return True
 
 
-def updateBoard(updated_position, curr_piece, player, GAME_BOARD):
+def updateBoard(updated_position, curr_piece, player, player2, GAME_BOARD):
 	target_piece = 0
 	new_true_position = []
 	color = player.getColor()
@@ -207,9 +355,11 @@ def updateBoard(updated_position, curr_piece, player, GAME_BOARD):
 				if position is updated_position:
 					target_piece = GAME_BOARD[x][y]
 
-	old_position = curr_piece.get_true_position()
+	old_true_position = curr_piece.get_true_position()
+	old_position = curr_piece.get_position()
 	# print(old_position)
-	GAME_BOARD[old_position[0]][old_position[1]] = ' '
+	GAME_BOARD[old_true_position[0]][old_true_position[1]] = ' '
+	check = False
 
 	if target_piece == 0:
 		# this means that there is no piece in that position
@@ -223,9 +373,32 @@ def updateBoard(updated_position, curr_piece, player, GAME_BOARD):
 			off_board_white.append(target_piece)
 		else:
 			off_board_black.append(target_piece)
+
 	# print(new_true_position)
 	GAME_BOARD[new_true_position[0]][new_true_position[1]] = curr_piece
-	printGameBoard(GAME_BOARD)
+	check = inCheck(player, player2, GAME_BOARD)
+	if check == True:
+		if target_piece == 0:
+			curr_piece.set_true_position(old_true_position)
+			curr_piece.set_position(old_position)
+			GAME_BOARD[new_true_position[0]][new_true_position[1]] = ' '
+		else:
+			if color == "WHITE":
+				off_board_white.remove(target_piece)
+			else:
+				off_board_black.remove(target_piece)
+
+			target_piece.set_position(updated_position)
+			target_piece.set_true_position(updated_position)
+			curr_piece.set_true_position(old_true_position)
+			curr_piece.set_position(old_position)
+			curr_piece.uncapture(target_piece, updated_position)
+			GAME_BOARD[new_true_position[0]][new_true_position[1]] = target_piece
+		return False
+
+	else:
+		printGameBoard(GAME_BOARD)
+		return True
 
 
 
@@ -292,13 +465,13 @@ def checkNearestEnemy(piece, side, GAME_BOARD):
 	# 			if "2" in str(enemies[x][y]):
 	# 				enemies[x][y] = "  "
 
-	printGameBoard(enemies)
+	# printGameBoard(enemies)
 
 	return enemies
 
 
 
-def pawnRules(valid_input, player, GAME_BOARD):
+def pawnRules(valid_input, player, player2, GAME_BOARD):
 	side = player.getColor()
 	piece = valid_input[3]
 	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
@@ -307,14 +480,13 @@ def pawnRules(valid_input, player, GAME_BOARD):
 	letter = rip_position[0]
 	number = int(rip_position[1])
 	true_position = piece.get_true_position()
-	print(true_position)
 
 	valid_moves = []
 
 	if side == "WHITE":
 		left_diagonal = (true_position[0] - 1, true_position[1] - 1)
 		right_diagonal = (true_position[0] - 1, true_position[1] + 1)
-		print(f"{left_diagonal} {right_diagonal}")
+		# print(f"{left_diagonal} {right_diagonal}")
 		if left_diagonal[0] < 0 or left_diagonal[1] < 0:
 			left_diagonal = "x"
 		if right_diagonal[0] < 0 or right_diagonal[1] > 7:
@@ -340,7 +512,7 @@ def pawnRules(valid_input, player, GAME_BOARD):
 	else:
 		left_diagonal = (true_position[0] + 1, true_position[1] - 1)
 		right_diagonal = (true_position[0] + 1, true_position[1] + 1)
-		print(f"{left_diagonal} {right_diagonal}")
+		# print(f"{left_diagonal} {right_diagonal}")
 		if left_diagonal[0] > 7 or left_diagonal[1] < 0:
 			left_diagonal = "x"
 		if right_diagonal[0] > 7 or right_diagonal[1] > 7:
@@ -369,59 +541,838 @@ def pawnRules(valid_input, player, GAME_BOARD):
 		return False
 	else:
 		print(f"Valid moves are {valid_moves}\n")
-		finalize(valid_moves, GAME_BOARD, piece, player)
-		return True
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+				return False
+
+def checkBishop(side, true_position, GAME_BOARD):
+	valid_moves = []
+
+	diagonal = diagonals(true_position)
+
+	dia_list = getQuadrants(diagonal, true_position)
+
+	right_up = dia_list[0]
+	right_down = dia_list[1]
+	left_up = dia_list[2]
+	left_down = dia_list[3]
+
+	#first split diagonals into 4 
+
+	if side == "WHITE":  
+		if len(right_up) != 0:
+			for pos in right_up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+		if len(right_down) != 0:
+			for pos in right_down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+		if len(left_up) != 0:
+			for pos in left_up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break			
+		if len(left_down) != 0:
+			for pos in left_down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+	else: 
+		if len(right_up) != 0:
+			for pos in right_up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+		if len(right_down) != 0:
+			for pos in right_down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+		if len(left_up) != 0:
+			for pos in left_up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break			
+		if len(left_down) != 0:
+			for pos in left_down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+	return valid_moves
 
 
+def checkRook(side, true_position, GAME_BOARD):
+	valid_moves = []
 
-def finalize(valid_moves, GAME_BOARD, piece, player):
+	regular = regulars(true_position)
+
+	splits = splitRegulars(regular, true_position)
+
+	left = splits[0]
+	right = splits[1]
+	up = splits[2]
+	down = splits[3]
+
+	if side == "WHITE":
+		if len(left) != 0:
+			for pos in left:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+		if len(right) != 0:
+			for pos in right:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+		if len(up) != 0:
+			for pos in up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+		if len(down) != 0:
+			for pos in down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+	else:
+		if len(left) != 0:
+			for pos in left:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+		if len(right) != 0:
+			for pos in right:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+		if len(up) != 0:
+			for pos in up:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+
+		if len(down) != 0:
+			for pos in down:
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				else:
+					if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+						valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+					break
+	return valid_moves
+
+def bishopRules(valid_input, player, player2, GAME_BOARD):
+	side = player.getColor()
+	piece = valid_input[3]
+	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
+	true_position = piece.get_true_position()
+
+	valid_moves = checkBishop(side, true_position, GAME_BOARD)
+
+	if not valid_moves:			
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		print(f"Valid moves are {valid_moves}\n")
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+			return False	
+
+def rookRules(valid_input, player, player2, GAME_BOARD):
+	side = player.getColor()
+	piece = valid_input[3]
+	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
+	true_position = piece.get_true_position()
+
+	valid_moves = checkRook(side, true_position, GAME_BOARD)
+
+	if not valid_moves:			
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		print(f"Valid moves are {valid_moves}\n")
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+			return False	
+
+def queenRules(valid_input, player, player2, GAME_BOARD):
+	side = player.getColor()
+	piece = valid_input[3]
+	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
+	true_position = piece.get_true_position()
+
+	valid_moves1 = checkRook(side, true_position, GAME_BOARD)
+	valid_moves2 = checkBishop(side, true_position, GAME_BOARD)
+	flatten = (valid_moves1, valid_moves2)
+
+	valid_moves = []
+
+	if not flatten:			
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		for sub in flatten:
+			for item in sub:
+				valid_moves.append(item)
+
+		print(f"Valid moves are {valid_moves}\n")
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+			return False	
+
+def knightRules(valid_input, player, player2, GAME_BOARD):
+	side = player.getColor()
+	piece = valid_input[3]
+	true_position = piece.get_true_position()
+
+	valid_moves = []
+
+	L = getLs(true_position)
+
+	if side == "WHITE":
+		for pos in L:
+			if pos != 'x':
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				elif "2" in str(GAME_BOARD[pos[0]][pos[1]]): 
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+	else:
+		for pos in L:
+			if pos != 'x':
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				elif "1" in str(GAME_BOARD[pos[0]][pos[1]]): 
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+
+	if not valid_moves:			
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		print(f"Valid moves are {valid_moves}\n")
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+			return False			
+
+
+def finalize(valid_moves, GAME_BOARD, piece, player, player2):
 	new_position = "x"
-	check = False
-	while check == False:
+	test = False
+	while test == False:
 		new_input = False
 		while isinstance(new_input, bool):
 			new_input = getNewPosition()
 		new_position = new_input[1] + new_input[2]
 		if new_position not in valid_moves:
-			check = False
+			test = False
 		else:
-			check = True
+			test = True
 
-	updateBoard(new_position, piece, player, GAME_BOARD)
-
-
-
-# def knightRules(position, player):
-
-# def bishopRules(position, player):
-
-# def rookRules(position, player):
-
-# def queenRules(position, player):
-
-# def kingRules(position, player):
+	check = updateBoard(new_position, piece, player, player2, GAME_BOARD)
+	if check:
+		return True
+	else:
+		return False
 
 
-def makeMove(myPlayer, GAME_BOARD):
+def getAllAround(true_position):
+	x = true_position[0]
+	y = true_position[1]
+
+	#clockwise from vertical
+	x1 = x - 1
+	y1 = y
+
+	x2 = x - 1
+	y2 = y + 1
+
+	x3 = x
+	y3 = y + 1
+
+	x4 = x + 1
+	y4 = y + 1
+
+	x5 = x + 1
+	y5 = y
+
+	x6 = x + 1
+	y6 = y - 1
+
+	x7 = x
+	y7 = y - 1
+
+	x8 = x - 1
+	y8 = y - 1
+
+	total = [(x1,y1), (x2,y2), (x3,y3), (x4,y4), (x5,y5), (x6,y6), (x7,y7), (x8,y8)]
+	for x in range(0,8):
+		item = total[x]
+		if (item[0] < 0 or item[0] > 7):
+			total[x] = 'x'
+		elif (item[1] < 0 or item[1] > 7):
+			total[x] = 'x'
+	return total
+
+
+
+
+def kingRules(valid_input, player, player2, GAME_BOARD):
+	side = player.getColor()
+	piece = valid_input[3]
+	true_position = piece.get_true_position()
+
+	valid_moves = []
+
+	total = getAllAround(true_position)
+
+	if side == "WHITE":
+		for pos in total:
+			if pos != 'x':
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				elif "2" in str(GAME_BOARD[pos[0]][pos[1]]): 
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+	else:
+		for pos in total:
+			if pos != 'x':
+				if isinstance(GAME_BOARD[pos[0]][pos[1]], str):
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+				elif "1" in str(GAME_BOARD[pos[0]][pos[1]]): 
+					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
+
+	if not valid_moves:			
+		print("No valid moves. Pick another piece.")
+		return False
+	else:
+		print(f"Valid moves are {valid_moves}\n")
+		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
+		if check:
+			return True
+		else:
+			return False
+
+
+
+def makeMove(myPlayer, secondPlayer, GAME_BOARD, check):
 
 	valid_move = False
+	side = myPlayer.getColor()
+	if check:
+		while(not valid_move):
+			while check:
+				valid_input = getAPiece(GAME_BOARD, myPlayer)
+				while isinstance(valid_input, bool):
+					valid_input = getAPiece(GAME_BOARD, myPlayer)
+				valid_move = pickAPiece(valid_input, myPlayer, secondPlayer, GAME_BOARD)
+				check = inCheck(myPlayer, secondPlayer, GAME_BOARD)
+				if check == True:
+					print("Your king is still in check. Try again")
 
-	while(not valid_move):
-		valid_input = getAPiece(GAME_BOARD, myPlayer)
-		while isinstance(valid_input, bool):
+	else:
+		while(not valid_move):
 			valid_input = getAPiece(GAME_BOARD, myPlayer)
-		valid_move = pickAPiece(valid_input, myPlayer, GAME_BOARD)
+			while isinstance(valid_input, bool):
+				valid_input = getAPiece(GAME_BOARD, myPlayer)
+			valid_move = pickAPiece(valid_input, myPlayer, secondPlayer, GAME_BOARD)
 
 
+def inCheck(curr_player, second_player, GAME_BOARD):
+	curr_color = curr_player.getColor()
+	enemy_color = second_player.getColor()
+	enemy_piece = ' '
 
-# def is_off_board():
+	if curr_color == "WHITE":
+		for column in GAME_BOARD:
+			for row_item in column:
+				if "K1" == str(row_item):
+					enemy_piece = row_item
+	else:
+		for column in GAME_BOARD:
+			for row_item in column:
+				if "K2" in str(row_item):	
+					enemy_piece = row_item
+
+	kings_position = enemy_piece.get_true_position()
+
+	if curr_color == "WHITE":
+		# pawn is checking king 
+		left_diagonal = (kings_position[0] - 1, kings_position[1] - 1)
+		right_diagonal = (kings_position[0] - 1, kings_position[1] + 1)
+		if left_diagonal[0] < 0 or left_diagonal[1] < 0:
+			left_diagonal = "x"
+		if right_diagonal[0] < 0 or right_diagonal[1] > 7:
+			right_diagonal = "x"
+		if not isinstance(left_diagonal, str):
+			if "P2" == str(GAME_BOARD[left_diagonal[0]][left_diagonal[1]]):
+				enemy_piece.setCheck(True)
+				return True
+		if not isinstance(right_diagonal, str):
+			if "P2" == str(GAME_BOARD[right_diagonal[0]][right_diagonal[1]]):
+				enemy_piece.setCheck(True)
+				return True
+		# knight is checking king
+		L = getLs(kings_position)
+		for pos in L:
+			if pos != 'x':
+				if "N2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		# bishop is checking king
+		diagonal = diagonals(kings_position)
+
+		dia_list = getQuadrants(diagonal, kings_position)
+
+		right_up = dia_list[0]
+		right_down = dia_list[1]
+		left_up = dia_list[2]
+		left_down = dia_list[3]
+		check = False
+
+		if len(right_up) != 0:
+			for pos in right_up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right_down) != 0:
+			for pos in right_down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(left_up) != 0:
+			for pos in left_up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+		if len(left_down) != 0:
+			for pos in left_down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		# rook is checking king 
+		regular = regulars(kings_position)
+
+		splits = splitRegulars(regular, kings_position)
+
+		left = splits[0]
+		right = splits[1]
+		up = splits[2]
+		down = splits[3]	
+
+		if len(left) != 0:
+			for pos in left:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right) != 0:
+			for pos in right:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(up) != 0:
+			for pos in up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(down) != 0:
+			for pos in down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		#queen is checking king
+		if len(left) != 0:
+			for pos in left:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right) != 0:
+			for pos in right:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(up) != 0:
+			for pos in up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(down) != 0:
+			for pos in down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+
+		if len(right_up) != 0:
+			for pos in right_up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right_down) != 0:
+			for pos in right_down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(left_up) != 0:
+			for pos in left_up:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+		if len(left_down) != 0:
+			for pos in left_down:
+				if "1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		#in faux check by other king 
+		around = getAllAround(kings_position)
+
+		for pos in around:
+			if pos != 'x':
+				if "K2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					return True
+
+	else:
+
+		left_diagonal = (kings_position[0] + 1, kings_position[1] - 1)
+		right_diagonal = (kings_position[0] + 1, kings_position[1] + 1)
+		if left_diagonal[0] > 7 or left_diagonal[1] < 0:
+			left_diagonal = "x"
+		if right_diagonal[0] > 7 or right_diagonal[1] > 7:
+			right_diagonal = "x"
+		if not isinstance(left_diagonal, str):
+			if "P1" == str(GAME_BOARD[left_diagonal[0]][left_diagonal[1]]):
+				enemy_piece.setCheck(True)
+				return True
+		if not isinstance(right_diagonal, str):
+			if "P1" == str(GAME_BOARD[right_diagonal[0]][right_diagonal[1]]):
+				enemy_piece.setCheck(True)
+				return True
+
+		L = getLs(kings_position)
+		for pos in L:
+			if pos != 'x':
+				if "N1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+
+		diagonal = diagonals(kings_position)
+
+		dia_list = getQuadrants(diagonal, kings_position)
+
+		right_up = dia_list[0]
+		right_down = dia_list[1]
+		left_up = dia_list[2]
+		left_down = dia_list[3]
+		check = False
+
+		if len(right_up) != 0:
+			for pos in right_up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right_down) != 0:
+			for pos in right_down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(left_up) != 0:
+			for pos in left_up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+		if len(left_down) != 0:
+			for pos in left_down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "B1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		regular = regulars(kings_position)
+
+		splits = splitRegulars(regular, kings_position)
+
+		left = splits[0]
+		right = splits[1]
+		up = splits[2]
+		down = splits[3]	
+
+		if len(left) != 0:
+			for pos in left:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right) != 0:
+			for pos in right:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(up) != 0:
+			for pos in up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(down) != 0:
+			for pos in down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "R1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		# queen check
+
+		if len(left) != 0:
+			for pos in left:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right) != 0:
+			for pos in right:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(up) != 0:
+			for pos in up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		if len(down) != 0:
+			for pos in down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+
+		if len(right_up) != 0:
+			for pos in right_up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(right_down) != 0:
+			for pos in right_down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+		if len(left_up) != 0:
+			for pos in left_up:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True		
+		if len(left_down) != 0:
+			for pos in left_down:
+				if "2" in str(GAME_BOARD[pos[0]][pos[1]]):
+					check = False
+					break
+				if "Q1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					enemy_piece.setCheck(True)
+					return True
+
+		around = getAllAround(kings_position)
+
+		for pos in around:
+			if pos != 'x':
+				if "K1" in str(GAME_BOARD[pos[0]][pos[1]]):
+					return True
+	return check
 
 
-# def in_check():
+def inMate(player1, player2, GAME_BOARD):
+	curr_piece = ' '
+	valid_input = ""
+	side_of_mate = player2.getColor()
+	color = 0
+	test_matrix = []
+	if side_of_mate == "WHITE":
+		color = "1"
+	else:
+		color = "2"
+	for column in GAME_BOARD:
+		for row_item in column:
+			if not isinstance(row_item, str):
+				if color in str(row_item):
+					curr_piece = row_item
+					name = list(str(curr_piece))
+					letter = name[0]
+					position = curr_piece.get_position()
+					valid_input = letter + position
+					valid_input = list(valid_input)
+					valid_input.append(curr_piece)
+					test = pickAPiece(valid_input, player1, player2, GAME_BOARD)
+					test_matrix.append(test)
+					valid_input = ""
 
+	flag = False
+	for item in test_matrix:
+		if item:
+			flag = True
+			break
+		else:
+			pass
 
-# def inMate():
-
+	if flag:
+		return False
+	else:
+		return True
+	
 
 def checkTurn(my_player1, my_player2):
 	if(my_player1.getTurn()):
@@ -462,8 +1413,17 @@ def flipBoard(GAME_BOARD):
 
 def gameStep(current_player, second_player, GAME_BOARD):
 	game_over = False
+	check = False
 	while game_over == False:
-		makeMove(current_player, GAME_BOARD)
+		makeMove(current_player, second_player, GAME_BOARD, check)
+		check = inCheck(second_player, current_player, GAME_BOARD)
+		if check:
+			print("KING IS IN CHECK")
+			in_mate = inMate(current_player, second_player, GAME_BOARD)
+			if in_mate:
+				game_over = True
+				print(f"{current_player} has mated {second_player}")
+				break
 		current_player.setTurn(False)
 		second_player.setTurn(True)
 		temp = current_player

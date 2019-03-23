@@ -133,13 +133,20 @@ class ChessPiece:
 	def set_true_position(self, position):
 		self.true_position = position
 
-	def is_captured(self, enemyPiece):
+	def is_captured(self):
 		self.alive = False
 		self.position = OFFBOARD
+
+	def is_not_captured(self, position):
+		self.alive = True
+		self.position = position
 
 	def capture(self, enemyPiece):
 		self.position = enemyPiece.get_position()
 		enemyPiece.is_captured()
+
+	def uncapture(self, enemyPiece, position):
+		enemyPiece.is_not_captured(position)
 
 
 class Pawn(ChessPiece):
@@ -194,6 +201,12 @@ class King(ChessPiece):
 		self.inCheck = False
 		self.moveSet = KING
 		self.score = 500
+
+	def setCheck(self, check):
+		self.inCheck = check
+
+	def getCheck(self):
+		return self.inCheck
 
 	def __str__(self):
 		return "K" + str(self.color)
