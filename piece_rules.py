@@ -30,9 +30,8 @@ def getYRepresentation(GAME_BOARD):
 	return Y_BOARD
 
 
-def pawnRules(valid_input, player, player2, GAME_BOARD):
+def pawnRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
 	position = piece.get_position()
 	rip_position = list(position)
@@ -100,11 +99,7 @@ def pawnRules(valid_input, player, player2, GAME_BOARD):
 		return False
 	else:
 		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-				return False
+	return valid_moves
 
 def checkBishop(side, true_position, GAME_BOARD):
 	valid_moves = []
@@ -275,47 +270,30 @@ def checkRook(side, true_position, GAME_BOARD):
 					break
 	return valid_moves
 
-def bishopRules(valid_input, player, player2, GAME_BOARD):
+def bishopRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
 	true_position = piece.get_true_position()
 
 	valid_moves = checkBishop(side, true_position, GAME_BOARD)
 
 	if not valid_moves:			
-		print("No valid moves. Pick another piece.")
 		return False
-	else:
-		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-			return False	
+	return valid_moves	
 
-def rookRules(valid_input, player, player2, GAME_BOARD):
+def rookRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
 	true_position = piece.get_true_position()
 
 	valid_moves = checkRook(side, true_position, GAME_BOARD)
 
-	if not valid_moves:			
-		print("No valid moves. Pick another piece.")
+	if not valid_moves:
 		return False
-	else:
-		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-			return False	
+	return valid_moves	
 
-def queenRules(valid_input, player, player2, GAME_BOARD):
+def queenRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	enemy = checkNearestEnemy(piece, side, GAME_BOARD)
 	true_position = piece.get_true_position()
 
@@ -326,23 +304,16 @@ def queenRules(valid_input, player, player2, GAME_BOARD):
 	valid_moves = []
 
 	if not flatten:			
-		print("No valid moves. Pick another piece.")
 		return False
 	else:
 		for sub in flatten:
 			for item in sub:
 				valid_moves.append(item)
 
-		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-			return False	
+	return valid_moves	
 
-def knightRules(valid_input, player, player2, GAME_BOARD):
+def knightRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	true_position = piece.get_true_position()
 
 	valid_moves = []
@@ -365,19 +336,11 @@ def knightRules(valid_input, player, player2, GAME_BOARD):
 					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
 
 	if not valid_moves:			
-		print("No valid moves. Pick another piece.")
 		return False
-	else:
-		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-			return False			
+	return valid_moves			
 
-def kingRules(valid_input, player, player2, GAME_BOARD):
+def kingRules(piece, player, player2, GAME_BOARD):
 	side = player.getColor()
-	piece = valid_input[3]
 	true_position = piece.get_true_position()
 
 	valid_moves = []
@@ -400,15 +363,8 @@ def kingRules(valid_input, player, player2, GAME_BOARD):
 					valid_moves.append(READ_IN_BOARD[pos[0]][pos[1]])
 
 	if not valid_moves:			
-		print("No valid moves. Pick another piece.")
 		return False
-	else:
-		print(f"Valid moves are {valid_moves}\n")
-		check = finalize(valid_moves, GAME_BOARD, piece, player, player2)
-		if check:
-			return True
-		else:
-			return False
+	return valid_moves
 
 
 
@@ -468,3 +424,4 @@ def checkNearestEnemy(piece, side, GAME_BOARD):
 	# printGameBoard(enemies)
 
 	return enemies
+

@@ -4,6 +4,9 @@
 # chess_game.py
 # Handles movements, utilizes chess_board library for environment
 
+
+### TO DO: en passant, promoting pawns, draw, insufficent material, scores.
+
 from chess_board import *
 from player import *
 from directional_output import *
@@ -86,7 +89,6 @@ def getAPiece(GAME_BOARD, myPlayer):
 
 def pickAPiece(valid_input, player1, player2, GAME_BOARD):
 	current_piece = valid_input[0]
-	position = valid_input[1] + valid_input[2]
 	actual_piece = valid_input[3]
 	all_pieces = {
 		'P': pawnRules,
@@ -97,11 +99,11 @@ def pickAPiece(valid_input, player1, player2, GAME_BOARD):
 		'K': kingRules
 	}
 	function = all_pieces.get(current_piece)
-	test = function(valid_input, player1, player2, GAME_BOARD)
-	if test == False:
+	valid_moves = function(actual_piece, player1, player2, GAME_BOARD)
+	if isinstance(valid_moves, bool):
 		return False
-	else:
-		return True
+	check = finalize(valid_moves, GAME_BOARD, actual_piece, player1, player2)
+	return check
 
 
 def updateBoard(updated_position, curr_piece, player, player2, GAME_BOARD):
@@ -231,26 +233,70 @@ def inMate(player1, player2, GAME_BOARD):
 			if not isinstance(row_item, str):
 				if color in str(row_item):
 					curr_piece = row_item
-					test = testRun(player2, curr_piece, TEST_BOARD)
+					test = testRun(player1, player2, curr_piece, TEST_BOARD)
 					test_matrix.append(test)
 					valid_input = ""
 
-	flag = False
 	for item in test_matrix:
-		if item:
-			flag = True
-			break
-		else:
-			pass
+		if item == False:
+			return False
+	return True
+			
 
-	if flag:
-		return False
+def testRun(player1, player2, piece, TEST_BOARD):
+	name = list(str(piece))
+	total_checks = []
+	letter = name[0]
+	all_pieces = {
+		'P': pawnRules,
+		'N': knightRules,
+		'B': bishopRules,
+		'R': rookRules,
+		'Q': queenRules,
+		'K': kingRules
+	}
+	function = all_pieces.get(letter)
+	valid_moves = function(piece, player1, player2, TEST_BOARD)
+	if not isinstance(valid_moves, bool):
+		for move in valid_moves:
+			new_position = move
+			check = updateTestBoard(new_position, piece, player1, player2, TEST_BOARD)
+			total_checks.append(check)
+	return total_checks
+
+def updateTestBoard(updated_position, curr_piece, player, player2, TEST_BOARD):
+	target_piece = 0
+	new_true_position = []
+	color = player.getColor()
+	for x in range(0,8):
+		for y in range(0,8):
+			if updated_position == READ_IN_BOARD[x][y]:
+				# print(updated_position)
+				new_true_position = (x,y)
+			temp = TEST_BOARD[x][y]
+			if isinstance(temp, str):
+				pass
+			else:
+				position = temp.get_position()
+				if position is updated_position:
+					target_piece = TEST_BOARD[x][y]
+
+	old_true_position = curr_piece.get_true_position()
+	old_position = curr_piece.get_position()
+	# print(old_position)
+	TEST_BOARD[old_true_position[0]][old_true_position[1]] = ' '
+
+	TEST_BOARD[new_true_position[0]][new_true_position[1]] = curr_piece
+	check = inCheck(player, player2, TEST_BOARD)
+
+	TEST_BOARD[old_true_position[0]][old_true_position[1]] = curr_piece
+	if not isinstance(target_piece, int):
+		TEST_BOARD[new_true_position[0]][new_true_position[1]] = target_piece
 	else:
-		return True
+		TEST_BOARD[new_true_position[0]][new_true_position[1]] = ' '	
+	return check
 
-def testRun(player, piece, TEST_BOARD):
 
-	
 
 def checkTurn(my_player1, my_player2):
 	if(my_player1.getTurn()):

@@ -7,7 +7,6 @@
 class Player():
 	def __init__(self, color):
 		self.color = color
-		self.score = []
 		self.alive = True
 		self.currentTurn = False
 
@@ -24,4 +23,4 @@ class Player():
 		return self.currentTurn
 
 	def __str__(self):
-		return self.color + " " + self.score
+		return self.color
